@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Signup from "./Signup";
 import Login from "./Login";
+import ReviewsList from "./components/ReviewsList";
 import api, { setAuthToken } from "./api";
 
 export default function App() {
@@ -51,7 +52,10 @@ export default function App() {
           <Link to="/signup" style={{ marginRight: 8 }}>
             Signup
           </Link>
-          <Link to="/login">Login</Link>
+          <Link to="/login" style={{ marginRight: 8 }}>
+            Login
+          </Link>
+          <Link to="/reviews">Reviews</Link>
         </div>
 
         {/* ユーザがいればアイコンと名前、ログアウトボタンを表示 */}
@@ -84,6 +88,7 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home user={user} />} />
+        <Route path="/reviews" element={<ReviewsList />} />
         <Route
           path="/signup"
           element={<Signup onSignup={(u) => setUser(u)} />}
