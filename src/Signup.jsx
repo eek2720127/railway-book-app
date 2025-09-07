@@ -98,7 +98,8 @@ export default function Signup({ onSignup }) {
 
       if (onSignup) onSignup(user);
       reset();
-      navigate("/");
+      // サインアップ成功後はレビュー一覧へ移動（Station6 要件）
+      navigate("/reviews");
     } catch (err) {
       console.error(err);
       setServerError(

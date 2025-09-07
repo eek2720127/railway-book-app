@@ -1,83 +1,75 @@
 // src/Login.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import api, { setAuthToken } from "./api";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Login({ onLogin }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const [serverError, setServerError] = React.useState("");
+  const { register, handleSubmit } = useForm();
+  const [serverError, setServerError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const onSubmit = async (data) => {
+  const handle = async (data) => {
     setServerError("");
+    setSubmitting(true);
     try {
       const res = await api.post("/signin", {
         email: data.email,
         password: data.password,
       });
-      // API が token を返す仕様
       const token = res.data?.token;
-      if (token) {
-        setAuthToken(token); // axios に Authorization をセット & localStorage に保存
-      }
+      if (token) setAuthToken(token);
 
-      // token を元にユーザ情報を取得する（必須）
+      // ユーザ情報取得
+      let user = null;
       try {
-        const userRes = await api.get("/users"); // GET /users
-        const user = userRes.data;
-        if (onLogin) onLogin(user); // App の setUser を呼ぶ
+        const userRes = await api.get("/users");
+        user = userRes.data;
       } catch (err) {
-        console.error("failed to fetch user after signin", err);
-        // ここでトークンが無効なら削除等の処理を行うことも検討
+        console.error("fetch user after signin failed", err);
       }
 
-      navigate("/");
+      if (onLogin) onLogin(user);
+      navigate("/reviews");
     } catch (err) {
       console.error(err);
       setServerError(
-        err.response?.data?.ErrorMessageJP || "ログインに失敗しました"
+        err.response?.data?.ErrorMessageJP ||
+          err.response?.data?.message ||
+          "ログインに失敗しました"
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 520 }}>
+    <div style={{ maxWidth: 640, padding: 12 }}>
       <h2>ログイン</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(handle)}>
         <div>
-          <label>メールアドレス</label>
           <input
-            {...register("email", { required: "メールアドレスは必須です" })}
+            {...register("email", { required: true })}
+            placeholder="メールアドレス"
           />
-          {errors.email && (
-            <p style={{ color: "red" }}>{errors.email.message}</p>
-          )}
         </div>
-
         <div>
-          <label>パスワード</label>
           <input
+            {...register("password", { required: true })}
+            placeholder="パスワード"
             type="password"
-            {...register("password", { required: "パスワードは必須です" })}
           />
-          {errors.password && (
-            <p style={{ color: "red" }}>{errors.password.message}</p>
-          )}
         </div>
-
         <div style={{ marginTop: 12 }}>
-          <button type="submit">ログイン</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "処理中…" : "ログイン"}
+          </button>
         </div>
         {serverError && <p style={{ color: "red" }}>{serverError}</p>}
       </form>
-
       <p>
-        アカウントをお持ちでないですか？ <Link to="/signup">新規登録</Link>
+        アカウントがない方は <Link to="/signup">新規登録</Link>
       </p>
     </div>
   );

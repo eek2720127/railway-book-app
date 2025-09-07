@@ -1,4 +1,6 @@
 // src/App.jsx
+import RequireAuth from "./components/RequireAuth";
+import RedirectIfAuth from "./components/RedirectIfAuth";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Signup from "./Signup";
@@ -87,13 +89,34 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home user={user} />} />
-        <Route path="/reviews" element={<ReviewsPage />} />{" "}
-        {/* ここだけにする */}
+
+        {/* 保護ルート： /reviews はログイン必須 */}
+        <Route
+          path="/reviews"
+          element={
+            <RequireAuth>
+              <ReviewsPage />
+            </RequireAuth>
+          }
+        />
+
+        {/* サインアップ/ログインページはログイン済みなら /reviews にリダイレクト */}
         <Route
           path="/signup"
-          element={<Signup onSignup={(u) => setUser(u)} />}
+          element={
+            <RedirectIfAuth>
+              <Signup onSignup={(u) => setUser(u)} />
+            </RedirectIfAuth>
+          }
         />
-        <Route path="/login" element={<Login onLogin={(u) => setUser(u)} />} />
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuth>
+              <Login onLogin={(u) => setUser(u)} />
+            </RedirectIfAuth>
+          }
+        />
       </Routes>
     </div>
   );
