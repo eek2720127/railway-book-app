@@ -3,25 +3,24 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Signup from "./Signup";
 import Login from "./Login";
-import ReviewsList from "./components/ReviewsList";
+// import ReviewsList from "./components/ReviewsList"; // <- 不要なのでコメントアウト/削除
+import ReviewsPage from "./pages/ReviewsPage";
 import api, { setAuthToken } from "./api";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // 起動時に token があればユーザ情報取得して state にセット
   useEffect(() => {
     async function fetchUser() {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        setAuthToken(token); // api に Authorization をセット
-        const res = await api.get("/users"); // GET /users でユーザ名等を取得
+        setAuthToken(token);
+        const res = await api.get("/users");
         setUser(res.data || null);
       } catch (err) {
         console.error("fetch user failed", err);
-        // トークンが無効なら削除しておく
         setAuthToken(null);
         setUser(null);
       }
@@ -55,10 +54,11 @@ export default function App() {
           <Link to="/login" style={{ marginRight: 8 }}>
             Login
           </Link>
-          <Link to="/reviews">Reviews</Link>
+          <Link to="/reviews" style={{ marginLeft: 8 }}>
+            Reviews
+          </Link>
         </div>
 
-        {/* ユーザがいればアイコンと名前、ログアウトボタンを表示 */}
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {user.iconUrl ? (
@@ -73,7 +73,6 @@ export default function App() {
                   border: "1px solid #ddd",
                 }}
                 onError={(e) => {
-                  // 取得に失敗したら画像を消す（任意）
                   e.currentTarget.style.display = "none";
                 }}
               />
@@ -88,7 +87,8 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home user={user} />} />
-        <Route path="/reviews" element={<ReviewsList />} />
+        <Route path="/reviews" element={<ReviewsPage />} />{" "}
+        {/* ここだけにする */}
         <Route
           path="/signup"
           element={<Signup onSignup={(u) => setUser(u)} />}
@@ -103,7 +103,6 @@ function Home({ user }) {
   return (
     <div>
       <h1>Welcome{user && user.name ? `, ${user.name}` : ""}</h1>
-
       {user ? (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {user.iconUrl && (
