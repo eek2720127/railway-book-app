@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Signup from "./Signup";
 import Login from "./Login";
-// import ReviewsList from "./components/ReviewsList"; // <- 不要なのでコメントアウト/削除
 import ReviewsPage from "./pages/ReviewsPage";
 import api, { setAuthToken } from "./api";
 
@@ -13,6 +12,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // 起動時に token があればユーザ情報取得して state にセット
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -50,17 +50,24 @@ export default function App() {
           <Link to="/" style={{ marginRight: 8 }}>
             Home
           </Link>
-          <Link to="/signup" style={{ marginRight: 8 }}>
-            Signup
-          </Link>
-          <Link to="/login" style={{ marginRight: 8 }}>
-            Login
-          </Link>
-          <Link to="/reviews" style={{ marginLeft: 8 }}>
+
+          {/* Reviews は常に表示（RequireAuth 側で保護） */}
+          <Link to="/reviews" style={{ marginRight: 8 }}>
             Reviews
           </Link>
+
+          {/* 未ログイン時のみ Signup / Login を表示 */}
+          {!user && (
+            <>
+              <Link to="/signup" style={{ marginRight: 8 }}>
+                Signup
+              </Link>
+              <Link to="/login">Login</Link>
+            </>
+          )}
         </div>
 
+        {/* ユーザがいればアイコンと名前、ログアウトボタンを表示 */}
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {user.iconUrl ? (
@@ -90,7 +97,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home user={user} />} />
 
-        {/* 保護ルート： /reviews はログイン必須 */}
+        {/* /reviews はログイン必須 */}
         <Route
           path="/reviews"
           element={
