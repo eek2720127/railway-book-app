@@ -140,7 +140,7 @@ export default function Signup({ onSignup }) {
 
         <div style={{ marginBottom: 8 }}>
           <label>アイコン（任意）</label>
-          {/* ファイル入力は register では扱わず onChange で直接 state に入れる（ファイルは uncontrolled の方が扱いやすい） */}
+          {/* ファイル入力は register では扱わず onChange で直接 state に入れる */}
           <input type="file" accept="image/*" onChange={onFileChange} />
           {avatarPreview && (
             <div style={{ marginTop: 8 }}>
