@@ -5,6 +5,7 @@ import api from "../api";
 import ReviewsList from "../components/ReviewsList";
 import Pagination from "../components/Pagination";
 import styles from "../components/ReviewsList.module.css";
+import { Link } from "react-router-dom";
 
 export default function ReviewsPage() {
   console.log("ReviewsPage: render");
@@ -14,7 +15,7 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [hasMore, setHasMore] = useState(true); // ← 追加: 次ページがあるかどうか
+  const [hasMore, setHasMore] = useState(true); // 次ページがあるかどうか
 
   useEffect(() => {
     let mounted = true;
@@ -77,10 +78,10 @@ export default function ReviewsPage() {
     <div className={styles.container}>
       <h2 className={styles.heading}>書籍レビュー一覧</h2>
 
-      {/* デバッグ用 JSON 出力（必要なければ削除可） */}
-      {/* <pre style={{ whiteSpace: "pre-wrap", maxHeight: 300, overflow: "auto" }}>
-        {JSON.stringify(reviews, null, 2)}
-      </pre> */}
+      {/* 投稿ページへのリンクを追加 */}
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/new">＋ 新しいレビューを投稿</Link>
+      </div>
 
       {loading ? (
         <div className={styles.info}>読み込み中…</div>

@@ -1,18 +1,19 @@
 // src/App.jsx
-import RequireAuth from "./components/RequireAuth";
-import RedirectIfAuth from "./components/RedirectIfAuth";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import RequireAuth from "./components/RequireAuth"; // 今後 profile などで使用
+import RedirectIfAuth from "./components/RedirectIfAuth";
 import Signup from "./Signup";
 import Login from "./Login";
 import ReviewsPage from "./pages/ReviewsPage";
+import Profile from "./pages/Profile";
 import api, { setAuthToken } from "./api";
+import NewReview from "./pages/NewReview";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // 起動時に token があればユーザ情報取得して state にセット
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -33,11 +34,12 @@ export default function App() {
   const handleLogout = () => {
     setAuthToken(null);
     setUser(null);
-    navigate("/");
+    navigate("/login");
   };
 
   return (
     <div style={{ padding: 20 }}>
+      {/* ===== ナビゲーションバー ===== */}
       <nav
         style={{
           marginBottom: 20,
@@ -50,24 +52,16 @@ export default function App() {
           <Link to="/" style={{ marginRight: 8 }}>
             Home
           </Link>
-
-          {/* Reviews は常に表示（RequireAuth 側で保護） */}
           <Link to="/reviews" style={{ marginRight: 8 }}>
             Reviews
           </Link>
-
-          {/* 未ログイン時のみ Signup / Login を表示 */}
-          {!user && (
-            <>
-              <Link to="/signup" style={{ marginRight: 8 }}>
-                Signup
-              </Link>
-              <Link to="/login">Login</Link>
-            </>
+          {user && (
+            <Link to="/profile" style={{ marginRight: 8 }}>
+              Profile
+            </Link>
           )}
         </div>
 
-        {/* ユーザがいればアイコンと名前、ログアウトボタンを表示 */}
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {user.iconUrl ? (
@@ -91,23 +85,21 @@ export default function App() {
               Logout
             </button>
           </div>
-        ) : null}
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Link to="/login" style={{ marginRight: 8 }}>
+              Login
+            </Link>
+            <Link to="/signup">Signup</Link>
+          </div>
+        )}
       </nav>
 
+      {/* ===== ルーティング ===== */}
       <Routes>
         <Route path="/" element={<Home user={user} />} />
+        <Route path="/reviews" element={<ReviewsPage />} />
 
-        {/* /reviews はログイン必須 */}
-        <Route
-          path="/reviews"
-          element={
-            <RequireAuth>
-              <ReviewsPage />
-            </RequireAuth>
-          }
-        />
-
-        {/* サインアップ/ログインページはログイン済みなら /reviews にリダイレクト */}
         <Route
           path="/signup"
           element={
@@ -122,6 +114,24 @@ export default function App() {
             <RedirectIfAuth>
               <Login onLogin={(u) => setUser(u)} />
             </RedirectIfAuth>
+          }
+        />
+
+        {/* プロフィール編集ページ：ログイン済みユーザー専用 */}
+        <Route
+          path="/profile"
+          element={
+            <RequireAuth>
+              <Profile onUpdateUser={(u) => setUser(u)} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/new"
+          element={
+            <RequireAuth>
+              <NewReview />
+            </RequireAuth>
           }
         />
       </Routes>
