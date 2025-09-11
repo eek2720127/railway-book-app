@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
-import RequireAuth from "./components/RequireAuth"; // 今後 profile などで使用
+import RequireAuth from "./components/RequireAuth";
 import RedirectIfAuth from "./components/RedirectIfAuth";
 import Signup from "./Signup";
 import Login from "./Login";
@@ -9,6 +9,8 @@ import ReviewsPage from "./pages/ReviewsPage";
 import Profile from "./pages/Profile";
 import api, { setAuthToken } from "./api";
 import NewReview from "./pages/NewReview";
+import EditReview from "./pages/EditReview";
+import ReviewDetail from "./pages/ReviewDetail";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -39,7 +41,6 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      {/* ===== ナビゲーションバー ===== */}
       <nav
         style={{
           marginBottom: 20,
@@ -68,6 +69,8 @@ export default function App() {
               <img
                 src={user.iconUrl}
                 alt="avatar"
+                width={40}
+                height={40}
                 style={{
                   width: 40,
                   height: 40,
@@ -95,10 +98,9 @@ export default function App() {
         )}
       </nav>
 
-      {/* ===== ルーティング ===== */}
       <Routes>
         <Route path="/" element={<Home user={user} />} />
-        <Route path="/reviews" element={<ReviewsPage />} />
+        <Route path="/reviews" element={<ReviewsPage user={user} />} />
 
         <Route
           path="/signup"
@@ -117,7 +119,6 @@ export default function App() {
           }
         />
 
-        {/* プロフィール編集ページ：ログイン済みユーザー専用 */}
         <Route
           path="/profile"
           element={
@@ -126,6 +127,7 @@ export default function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/new"
           element={
@@ -134,6 +136,17 @@ export default function App() {
             </RequireAuth>
           }
         />
+
+        {/* 編集ページ：ログイン済みユーザのみ */}
+        <Route
+          path="/edit/:id"
+          element={
+            <RequireAuth>
+              <EditReview />
+            </RequireAuth>
+          }
+        />
+        <Route path="/detail/:id" element={<ReviewDetail />} />
       </Routes>
     </div>
   );
@@ -149,6 +162,8 @@ function Home({ user }) {
             <img
               src={user.iconUrl}
               alt="avatar"
+              width={72}
+              height={72}
               style={{
                 width: 72,
                 height: 72,
